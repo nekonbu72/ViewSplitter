@@ -7,6 +7,7 @@
       class="gutter"
       draggable="true"
       @dragstart="handleDragStart"
+      @drag="handleDrag"
       @dragend="handleDragEnd"
       v-show="isSolidShown"
     ></div>
@@ -25,7 +26,7 @@ export default {
        * @type {HTMLElement}
        */
       solid: {},
-      before: -1,
+      beforeClientX: -1,
       sample: "text ".repeat(50),
       isSolidShown: true
     };
@@ -53,21 +54,37 @@ export default {
      * @param {DragEvent} e
      */
     handleDragStart(e) {
-      this.before = e.clientX;
-      // e.preventDefault();
+      console.log("dragstart");
+      e.dataTransfer.setData("text/plain", "");
+
+      console.log("before:", e.clientX);
+      this.beforeClientX = e.clientX;
     },
+
+    /**
+     * @param {DragEvent} e
+     */
+    handleDrag(e) {
+      console.log("dragging", e.clientX);
+    },
+
     /**
      * @param {DragEvent} e
      */
     handleDragEnd(e) {
-      const move = e.clientX - this.before;
-      const paddingPx = getComputedStyle(this.solid).getPropertyValue(
-        "padding"
-      );
-      const padding = parseInt(paddingPx);
+      console.log("before:", this.beforeClientX, " after:", e.clientX);
 
-      this.solid.style.width = `${this.solid.clientWidth - padding + move}px`;
-      this.before = e.clientX;
+      const move = e.clientX - this.beforeClientX;
+
+      const style = window.getComputedStyle(this.solid);
+
+      const widthPx = style.getPropertyValue("width");
+      const width = parseFloat(widthPx);
+
+      console.log("mv:", move, " st:", style, " px:", widthPx, " w:", width);
+
+      this.solid.style.width = `${width + move}px`;
+      this.beforeClientX = e.clientX;
     },
     /**
      * @param {DragEvent} e
